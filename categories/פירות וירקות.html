@@ -11,6 +11,7 @@
 <body>
 <header class="site-head">
   <div class="head-top">
+    <button class="hamburger" type="button" aria-label="פתיחת תפריט"><span></span><span></span><span></span></button>
     <a class="brand" href="../index.html">
       <img class="brand-logo" src="../assets/logo.svg" alt="הכל מהכל – הסופר שלי">
     </a>
@@ -18,13 +19,40 @@
     <div class="head-right">
       <form class="head-search" action="../search.html" method="get" role="search">
         <input type="search" name="q" placeholder="חיפוש מוצר באתר…" aria-label="חיפוש מוצר">
-        <button type="submit" aria-label="חיפוש">🔍</button>
+        <button type="submit" aria-label="חיפוש"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></button>
       </form>
       <button class="club-btn" type="button" aria-label="מועדון חברים"><span class="club-ic">👤</span><span class="club-lbl">מועדון חברים</span></button>
       <button class="cart-btn" type="button" aria-label="עגלת קניות">🛒<span class="cart-count" style="display:none">0</span></button>
     </div>
   </div>
 </header>
+<div id="side-overlay"></div>
+<aside id="side-menu" aria-label="תפריט ניווט">
+  <div class="side-head">
+    <img src="../assets/logo.svg" alt="הכל מהכל – הסופר שלי">
+    <button id="side-close" type="button" aria-label="סגירה">✕</button>
+  </div>
+  <form class="head-search side-search" action="../search.html" method="get" role="search">
+    <input type="search" name="q" placeholder="חיפוש מוצר באתר…" aria-label="חיפוש מוצר">
+    <button type="submit" aria-label="חיפוש"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></button>
+  </form>
+  <nav class="side-nav">
+    <details class="side-dd"><summary>מחלקות</summary><div class="side-sub"><a href="../categories/%D7%9E%D7%95%D7%A6%D7%A8%D7%99%20%D7%97%D7%9C%D7%91%20%D7%95%D7%91%D7%99%D7%A6%D7%99%D7%9D.html">מוצרי חלב וביצים</a><a href="../categories/%D7%9C%D7%97%D7%9D%20%D7%9E%D7%90%D7%A4%D7%99%D7%9D%20%D7%95%D7%A2%D7%95%D7%92%D7%99%D7%95%D7%AA.html">לחם מאפים ועוגיות</a><a href="../categories/%D7%A4%D7%99%D7%A8%D7%95%D7%AA%20%D7%95%D7%99%D7%A8%D7%A7%D7%95%D7%AA.html">פירות וירקות</a><a href="../categories/%D7%91%D7%A9%D7%A8%20%D7%A2%D7%95%D7%A3%20%D7%95%D7%93%D7%92%D7%99%D7%9D.html">בשר עוף ודגים</a><a href="../categories/%D7%A7%D7%A4%D7%95%D7%90%D7%99%D7%9D%20%D7%95%D7%90%D7%95%D7%9B%D7%9C%20%D7%9E%D7%95%D7%9B%D7%9F.html">קפואים ואוכל מוכן</a><a href="../categories/%D7%A0%D7%A7%D7%A0%D7%99%D7%A7%D7%99%D7%9D%20%D7%95%D7%A1%D7%9C%D7%98%D7%99%D7%9D.html">נקניקים וסלטים</a><a href="../categories/%D7%90%D7%95%D7%A8%D7%92%D7%A0%D7%99%20%D7%95%D7%91%D7%A8%D7%99%D7%90%D7%95%D7%AA.html">אורגני ובריאות</a><a href="../categories/%D7%A7%D7%98%D7%A0%D7%99%D7%95%D7%AA%20%D7%95%D7%A9%D7%9E%D7%A0%D7%99%D7%9D.html">קטניות ושמנים</a><a href="../categories/%D7%A9%D7%99%D7%9E%D7%95%D7%A8%D7%99%D7%9D%20%D7%95%D7%90%D7%A4%D7%99%D7%99%D7%94.html">שימורים ואפייה</a><a href="../categories/%D7%97%D7%98%D7%99%D7%A4%D7%99%D7%9D%20%D7%95%D7%93%D7%92%D7%A0%D7%99%D7%9D.html">חטיפים ודגנים</a><a href="../categories/%D7%9E%D7%A9%D7%A7%D7%90%D7%95%D7%AA.html">משקאות</a><a href="../categories/%D7%97%D7%95%D7%9E%D7%A8%D7%99%20%D7%A0%D7%99%D7%A7%D7%95%D7%99%20%D7%95%D7%91%D7%99%D7%AA.html">חומרי ניקוי ובית</a><a href="../categories/%D7%9E%D7%95%D7%A6%D7%A8%D7%99%20%D7%98%D7%99%D7%A4%D7%95%D7%97%20%D7%95%D7%AA%D7%99%D7%A0%D7%95%D7%A7%D7%95%D7%AA.html">מוצרי טיפוח ותינוקות</a><a href="../categories/%D7%97%D7%93%20%D7%A4%D7%A2%D7%9E%D7%99%20%D7%95%D7%9E%D7%AA%D7%9B%D7%9C%D7%94.html">חד פעמי ומתכלה</a></div></details>
+    <a href="../about.html">אודות</a>
+    <a href="../sales.html">מבצעים</a>
+    <a href="../delivery.html">משלוחים</a>
+    <a href="../contact.html">יצירת קשר</a>
+    <div class="side-actions">
+      <button class="club-btn" type="button" aria-label="מועדון חברים"><span class="club-ic">👤</span><span class="club-lbl">מועדון חברים</span></button>
+      <button class="cart-btn" type="button" aria-label="עגלת קניות"><span class="cart-ic">🛒</span> עגלת הקניות <span class="cart-count" style="display:none">0</span></button>
+    </div>
+    <div class="side-legal">
+      <a href="../accessibility.html">הצהרת נגישות</a>
+      <a href="../privacy.html">מדיניות פרטיות</a>
+      <a href="../terms.html">תנאי שימוש</a>
+    </div>
+  </nav>
+</aside>
 <main>
 <div class="dept-page"><h1 class="dept-title"><span>🥬</span> פירות וירקות</h1><nav class="subnav"><a href="../index.html#מחלקות">כל המחלקות</a><a href="#sub-26373">פירות</a><a href="#sub-26374">ירקות</a><a href="#sub-26547">ירקות ארוזים</a><a href="#sub-26375">ירק</a><a href="#sub-26545">פירות יבשים ופיצוחים</a></nav><section class="subcat" id="sub-26373"><h2 class="subcat-title">פירות <span class="cnt">(31)</span></h2><div class="grid"><article class="card">
     <div class="card-img"><span class="badge badge-new">חדש</span><span class="badge badge-sale">מבצע</span><img loading="lazy" src="../images/%D7%90%D7%91%D7%98%D7%99%D7%97.jpg" alt="אבטיח"></div>
@@ -941,9 +969,10 @@
   </article></div></section></div>
 </main>
 <footer class="site-foot">
+  <h2 class="foot-title">מפת האתר</h2>
   <div class="foot-grid">
     <div class="foot-col foot-about">
-      <img class="foot-logo" src="../assets/logo.svg" alt="הכל מהכל – הסופר שלי">
+      <a href="../index.html" aria-label="הכל מהכל – הסופר שלי — לדף הבית"><img class="foot-logo" src="../assets/logo.svg" alt="הכל מהכל – הסופר שלי"></a>
       <p>סופרמרקט שכונתי ומשלוחים עד הבית באזור מודיעין — 1,436 מוצרים ב-14 מחלקות.</p>
       <p class="foot-deliv">🚚 דמי משלוח 25 ₪ · משלוח חינם בקנייה מעל 300 ₪</p>
     </div>
@@ -1005,5 +1034,6 @@
 <script src="../assets/club.js"></script>
 <script src="../assets/a11y.js"></script>
 <script src="../assets/search.js"></script>
+<script src="../assets/menu.js"></script>
 </body>
 </html>

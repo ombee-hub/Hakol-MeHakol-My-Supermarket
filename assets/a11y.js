@@ -58,7 +58,12 @@
           (b.k === 'fontUp' ? '' : '') + '</button>').join('') +
       '</div>' +
       '<div class="a11y-fontrow">גודל טקסט נוכחי: <b id="a11y-fontlabel">0</b></div>' +
-      '<button id="a11y-reset" class="a11y-reset">איפוס הגדרות נגישות</button>';
+      '<button id="a11y-reset" class="a11y-reset">איפוס הגדרות נגישות</button>' +
+      '<div class="a11y-foot">' +
+        '<a href="' + ROOT + 'accessibility.html">הצהרת נגישות</a>' +
+        '<a href="' + ROOT + 'privacy.html">מדיניות פרטיות</a>' +
+        '<a href="' + ROOT + 'terms.html">תנאי שימוש</a>' +
+      '</div>';
 
     // append to <html> so page zoom/filter never affect the widget itself
     const root = document.documentElement;
