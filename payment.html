@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>סיום הזמנה — הכל מהכל – הסופר שלי</title>
+<title>תשלום — הכל מהכל – הסופר שלי</title>
 <link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/products-data.js"></script>
@@ -55,23 +55,27 @@
 </aside>
 <main>
 <div class="page-pad narrow">
-  <h1 class="page-h1">🧾 סיום הזמנה</h1>
-  <div id="checkout-root">
-    <div id="co-summary"></div>
-    <form id="co-form" class="checkout-form">
-      <h3>פרטי המזמין והמשלוח</h3>
-      <div class="co-fields">
-        <input name="name" type="text" placeholder="שם מלא *" required>
-        <input name="phone" type="tel" placeholder="טלפון *" required>
-        <input name="address" type="text" placeholder="כתובת (רחוב ומספר) *" required>
-        <select name="city" required>
-          <option value="">בחירת יישוב לחלוקה *</option>
-          <option value="מודיעין">מודיעין</option><option value="רעות">רעות</option><option value="מכבים">מכבים</option><option value="נוף איילון">נוף איילון</option><option value="לפיד">לפיד</option><option value="שילת">שילת</option><option value="כפר רות">כפר רות</option><option value="אורנים">אורנים</option><option value="חשמונאים">חשמונאים</option>
-        </select>
-        <textarea name="notes" rows="3" placeholder="הערות להזמנה (אופציונלי)"></textarea>
+  <h1 class="page-h1">🔒 תשלום מאובטח</h1>
+  <div class="pay-demo-note">⚠️ עמוד זה הוא <b>הדגמה בלבד</b> — התשלום אינו פעיל ואין להזין פרטי כרטיס אמיתיים. בגרסה החיה התשלום יתבצע דרך עמוד מאובטח של ספק סליקה (תקן PCI).</div>
+  <div id="payment-root">
+    <div id="pay-summary"></div>
+    <form id="pay-form" class="pay-form">
+      <h3>בחירת אמצעי תשלום</h3>
+      <div class="pay-methods">
+        <label class="pay-method"><input type="radio" name="method" value="card" checked> <span>💳 כרטיס אשראי</span></label>
+        <label class="pay-method"><input type="radio" name="method" value="bit"> <span>📲 Bit</span></label>
+        <label class="pay-method"><input type="radio" name="method" value="cash"> <span>🚚 מזומן/אשראי בעת המשלוח</span></label>
       </div>
-      <p class="co-disclaimer">בשלב הבא תעברו לעמוד התשלום לסיום ההזמנה.</p>
-      <button class="btn btn-gold co-submit" type="submit">המשך לתשלום</button>
+      <div class="pay-card" id="pay-card-fields">
+        <input name="cardname" placeholder="שם בעל/ת הכרטיס" autocomplete="off">
+        <input name="cardnum" placeholder="מספר כרטיס" inputmode="numeric" maxlength="19" autocomplete="off">
+        <div class="pay-row">
+          <input name="exp" placeholder="תוקף MM/YY" maxlength="5" autocomplete="off">
+          <input name="cvv" placeholder="CVV" inputmode="numeric" maxlength="4" autocomplete="off">
+        </div>
+      </div>
+      <button class="btn btn-gold pay-submit" type="submit">אישור תשלום · <span id="pay-total"></span></button>
+      <p class="pay-secure">🔒 העסקה מוצפנת ומאובטחת (הדגמה)</p>
     </form>
   </div>
 </div>

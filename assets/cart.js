@@ -117,7 +117,29 @@
       '</tfoot></table>';
   }
 
-  function renderAll() { renderBadge(); renderCardControls(); renderDrawer(); renderCheckout(); }
+  function summaryTable() {
+    return '<table class="co-table"><thead><tr><th>מוצר</th><th>כמות</th><th>מחיר</th><th>סה"כ</th></tr></thead><tbody>' +
+      cart.map(x => '<tr><td>' + x.name + '</td><td>' + x.qty + '</td><td>' + money(parseFloat(x.price)) + '</td><td>' + money(x.qty * parseFloat(x.price)) + '</td></tr>').join('') +
+      '</tbody><tfoot>' +
+      '<tr><td colspan="3">סכום ביניים</td><td>' + money(subtotal()) + '</td></tr>' +
+      '<tr><td colspan="3">דמי משלוח</td><td>' + (fee() === 0 ? 'חינם' : money(fee())) + '</td></tr>' +
+      '<tr class="co-total"><td colspan="3">סה"כ לתשלום</td><td>' + money(total()) + '</td></tr>' +
+      '</tfoot></table>';
+  }
+  function renderPayment() {
+    const root = document.getElementById('payment-root'); if (!root) return;
+    if (root.dataset.done === '1') return;
+    const sum = root.querySelector('#pay-summary');
+    if (!cart.length) {
+      if (sum) sum.innerHTML = '<p class="cart-empty">העגלה ריקה. <a href="' + ROOT + 'index.html">למעבר לקטלוג</a></p>';
+      const f = root.querySelector('#pay-form'); if (f) f.style.display = 'none';
+      return;
+    }
+    if (sum) sum.innerHTML = summaryTable();
+    const t = root.querySelector('#pay-total'); if (t) t.textContent = money(total());
+  }
+
+  function renderAll() { renderBadge(); renderCardControls(); renderDrawer(); renderCheckout(); renderPayment(); }
 
   /* ---------- global click delegation ---------- */
   document.addEventListener('click', function (ev) {
@@ -130,40 +152,66 @@
     const del = ev.target.closest('.ci-del'); if (del) { remove(del.dataset.id); return; }
   });
 
-  /* ---------- checkout form submit ---------- */
+  /* ---------- checkout (step 1): save details, go to payment ---------- */
   document.addEventListener('submit', function (ev) {
-    const form = ev.target.closest('#co-form'); if (!form) return;
-    ev.preventDefault();
-    if (!cart.length) return;
-    const data = Object.fromEntries(new FormData(form).entries());
-    const orderNo = 'HMH-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000);
-    const lines = cart.map(x => '• ' + x.name + ' × ' + x.qty + ' = ' + money(x.qty * parseFloat(x.price)));
-    const text =
-      'הזמנה חדשה מהאתר — הכל מהכל הסופר שלי%0A' +
-      'מס׳ הזמנה: ' + orderNo + '%0A%0A' +
-      lines.join('%0A') + '%0A%0A' +
-      'סכום ביניים: ' + money(subtotal()) + '%0A' +
-      'דמי משלוח: ' + (fee() === 0 ? 'חינם' : money(fee())) + '%0A' +
-      'סה"כ: ' + money(total()) + '%0A%0A' +
-      'שם: ' + (data.name || '') + '%0A' +
-      'טלפון: ' + (data.phone || '') + '%0A' +
-      'כתובת: ' + (data.address || '') + ', ' + (data.city || '') + '%0A' +
-      'הערות: ' + (data.notes || '-');
-    const wa = 'https://wa.me/' + PHONE_INTL + '?text=' + text;
-    const root = document.getElementById('checkout-root');
-    root.dataset.done = '1';
-    root.innerHTML =
-      '<div class="co-done">' +
-      '<div class="co-check">✓</div>' +
-      '<h1>ההזמנה התקבלה!</h1>' +
-      '<p>תודה ' + (data.name || '') + '! מספר ההזמנה שלך: <b>' + orderNo + '</b></p>' +
-      '<p class="co-sum-amt">סה"כ לתשלום: <b>' + money(total()) + '</b> · משלוח ל' + (data.city || '') + '</p>' +
-      '<p>לשליחת ההזמנה לסופר ולתיאום המשלוח:</p>' +
-      '<a class="btn btn-gold" target="_blank" href="' + wa + '">📲 שליחת ההזמנה בוואטסאפ</a> ' +
-      '<a class="btn" href="' + ROOT + 'index.html">להמשך קנייה</a>' +
-      '<p class="co-note">ניתן גם להתקשר ישירות: <a href="tel:086503535">08-6503535</a></p>' +
-      '</div>';
-    clear();
+    const co = ev.target.closest('#co-form');
+    if (co) {
+      ev.preventDefault();
+      if (!cart.length) return;
+      const data = Object.fromEntries(new FormData(co).entries());
+      localStorage.setItem('hmh_checkout_v1', JSON.stringify(data));
+      window.location.href = ROOT + 'payment.html';
+      return;
+    }
+    /* ---------- payment (step 2, demo): confirm order ---------- */
+    const pf = ev.target.closest('#pay-form');
+    if (pf) {
+      ev.preventDefault();
+      if (!cart.length) return;
+      let data = {}; try { data = JSON.parse(localStorage.getItem('hmh_checkout_v1') || '{}'); } catch (e) { data = {}; }
+      const method = new FormData(pf).get('method') || 'card';
+      const methodLabel = method === 'card' ? 'כרטיס אשראי' : (method === 'bit' ? 'Bit' : 'מזומן/אשראי בעת המשלוח');
+      const orderNo = 'HMH-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000);
+      const lines = cart.map(x => '• ' + x.name + ' × ' + x.qty + ' = ' + money(x.qty * parseFloat(x.price)));
+      const text =
+        'הזמנה חדשה מהאתר — הכל מהכל הסופר שלי%0A' +
+        'מס׳ הזמנה: ' + orderNo + '%0A' +
+        'אמצעי תשלום: ' + methodLabel + '%0A%0A' +
+        lines.join('%0A') + '%0A%0A' +
+        'סכום ביניים: ' + money(subtotal()) + '%0A' +
+        'דמי משלוח: ' + (fee() === 0 ? 'חינם' : money(fee())) + '%0A' +
+        'סה"כ: ' + money(total()) + '%0A%0A' +
+        'שם: ' + (data.name || '') + '%0A' +
+        'טלפון: ' + (data.phone || '') + '%0A' +
+        'כתובת: ' + (data.address || '') + ', ' + (data.city || '') + '%0A' +
+        'הערות: ' + (data.notes || '-');
+      const wa = 'https://wa.me/' + PHONE_INTL + '?text=' + text;
+      const root = document.getElementById('payment-root');
+      root.dataset.done = '1';
+      root.innerHTML =
+        '<div class="co-done">' +
+        '<div class="co-check">✓</div>' +
+        '<h1>ההזמנה התקבלה!</h1>' +
+        '<p class="pay-demo-inline">(הדגמה — לא בוצע חיוב אמיתי)</p>' +
+        '<p>תודה ' + (data.name || '') + '! מספר ההזמנה: <b>' + orderNo + '</b></p>' +
+        '<p class="co-sum-amt">סה"כ: <b>' + money(total()) + '</b> · ' + methodLabel + (data.city ? ' · משלוח ל' + data.city : '') + '</p>' +
+        '<p>לתיאום ההזמנה מול הסופר:</p>' +
+        '<a class="btn btn-gold" target="_blank" href="' + wa + '">📲 שליחת ההזמנה בוואטסאפ</a> ' +
+        '<a class="btn" href="' + ROOT + 'index.html">להמשך קנייה</a>' +
+        '<p class="co-note">ניתן גם להתקשר ישירות: <a href="tel:086503535">08-6503535</a></p>' +
+        '</div>';
+      clear();
+      localStorage.removeItem('hmh_checkout_v1');
+      return;
+    }
+  });
+
+  /* ---------- payment method toggle (show card fields only for card) ---------- */
+  document.addEventListener('change', function (ev) {
+    if (ev.target && ev.target.name === 'method') {
+      const cf = document.getElementById('pay-card-fields');
+      if (cf) cf.style.display = (ev.target.value === 'card') ? '' : 'none';
+    }
   });
 
   /* ---------- init ---------- */

@@ -404,6 +404,22 @@ html.a11y-invert img, html.a11y-invert video, html.a11y-invert .card-img, html.a
 .co-note{margin-top:18px;color:var(--muted)}
 .co-note a{color:var(--gold-deep);font-weight:700}
 
+/* ===== payment (demo) ===== */
+.pay-demo-note{background:#fff4e5;border:1px solid #f0d8a8;color:#8a5a00;border-radius:10px;padding:12px 16px;font-size:13.5px;margin-bottom:16px;line-height:1.6}
+.pay-form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);margin-top:16px}
+.pay-form h3{margin:0 0 12px;font-size:17px}
+.pay-methods{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.pay-method{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;font-weight:600}
+.pay-method:has(input:checked){border-color:var(--gold);background:#fbf6e7}
+.pay-method input{accent-color:var(--gold-deep);width:18px;height:18px}
+.pay-card{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.pay-card input{padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:15px}
+.pay-row{display:flex;gap:12px}
+.pay-row input{flex:1;min-width:0}
+.pay-submit{width:100%}
+.pay-secure{text-align:center;color:var(--muted);font-size:12.5px;margin:10px 0 0}
+.pay-demo-inline{color:var(--muted);font-size:13px;margin:0 0 6px}
+
 @media(max-width:1000px){
   .foot-grid{grid-template-columns:1fr 1fr;gap:24px}
 }
