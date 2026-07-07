@@ -207,8 +207,9 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
     <p class="login-sub">הזינו סיסמה כדי להיכנס</p>
     <input type="password" id="login-pass" placeholder="סיסמה" autocomplete="current-password">
     <button class="btn btn-gold" id="login-btn">כניסה</button>
+    <button class="btn btn-line" id="bio-login" style="display:none;width:100%;margin-top:10px">🔒 כניסה עם טביעת אצבע / זיהוי פנים</button>
     <p class="login-err" id="login-err"></p>
-    <p class="login-hint">ניתן לשנות סיסמה ב"הגדרות חנות"</p>
+    <p class="login-hint">ניתן לשנות סיסמה ולהפעיל כניסה ביומטרית ב"הגדרות חנות"</p>
   </div>
 </div>
 <div id="dash-overlay"></div>
@@ -406,8 +407,16 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
       '<label class="full">אזורי חלוקה (מופרדים בפסיק)<textarea id="s_areas" rows="2">'+esc(SET.areas)+'</textarea></label>'+
       '<label class="full">🔑 סיסמת כניסה לדשבורד<input type="text" id="s_pass" value="'+esc(getPass())+'"></label>'+
       '</div><div class="hint">שינויים כאן נשמרים מקומית. כדי לעדכן את האתר החי בפרטים אלה — יש להחילם בבנייה מחדש (בקשו זאת ממני).</div>'+
-      '<div style="margin-top:14px"><button class="btn btn-gold" id="ssave">שמירת הגדרות</button></div></div>';
+      '<div style="margin-top:14px"><button class="btn btn-gold" id="ssave">שמירת הגדרות</button></div>'+
+      '<div style="border-top:1px solid var(--line);margin-top:18px;padding-top:16px"><b style="font-size:14px">🔒 כניסה ביומטרית (טביעת אצבע / זיהוי פנים)</b>'+
+      '<p class="hint" id="bio-status" style="margin:6px 0"></p><button type="button" class="btn btn-line" id="bio-toggle">—</button></div></div>';
     ['name','phone','address','hours','fee','freeOver'].forEach(function(k){document.getElementById('s_'+k).value=SET[k]||'';});
+    (function(){
+      var st2=document.getElementById('bio-status'),bt=document.getElementById('bio-toggle');
+      function upd(){var on=!!localStorage.getItem('hmh_bio_cred');bt.textContent=on?'ביטול כניסה ביומטרית במכשיר זה':'הפעלת כניסה ביומטרית במכשיר זה';st2.textContent=on?'✓ מופעל במכשיר זה — בכניסה הבאה אפשר להיכנס עם טביעת אצבע/פנים.':(bioSupported()?'לא מופעל. מומלץ בטלפון/טאבלט (דורש חיבור מאובטח HTTPS).':'המכשיר/דפדפן אינו תומך, או שאינך על חיבור מאובטח (HTTPS).');}
+      upd();
+      bt.onclick=function(){if(localStorage.getItem('hmh_bio_cred')){localStorage.removeItem('hmh_bio_cred');toast('כניסה ביומטרית בוטלה');upd();}else{if(!bioSupported()){modalAlert('הדפדפן/מכשיר אינו תומך בכניסה ביומטרית, או שאינך על חיבור מאובטח (HTTPS). נסו מהכתובת המקוונת (Pages) בטלפון.','כניסה ביומטרית');return;}bioRegister().then(function(){toast('כניסה ביומטרית הופעלה');upd();}).catch(function(){modalAlert('ההפעלה נכשלה או בוטלה. ודאו שיש במכשיר טביעת אצבע/זיהוי פנים ושאתם על https.','כניסה ביומטרית');});}};
+    })();
     document.getElementById('ssave').addEventListener('click',function(){
       ['name','phone','address','hours','fee','freeOver'].forEach(function(k){SET[k]=document.getElementById('s_'+k).value;});
       SET.areas=document.getElementById('s_areas').value;
@@ -707,6 +716,20 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
   document.getElementById('login-btn').onclick=tryLogin;
   document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')tryLogin();});
   document.getElementById('logout').onclick=function(){sessionStorage.removeItem(AUTHK);showLogin();toast('התנתקת');};
+
+  /* ---------- biometric login (WebAuthn — fingerprint / face) ---------- */
+  var BIOK='hmh_bio_cred';
+  function b64ToBuf(b64){var bin=atob(b64);var a=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a.buffer;}
+  function bufToB64(buf){var b=new Uint8Array(buf),s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s);}
+  function randCh(){var a=new Uint8Array(32);window.crypto.getRandomValues(a);return a;}
+  function bioSupported(){return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create && window.isSecureContext);}
+  function bioRegister(){return navigator.credentials.create({publicKey:{challenge:randCh(),rp:{name:'הכל מהכל — ניהול'},user:{id:new Uint8Array([104,109,104,45,97,100,109,105,110]),name:'admin',displayName:'מנהל החנות'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000,attestation:'none'}}).then(function(cred){localStorage.setItem(BIOK,bufToB64(cred.rawId));return true;});}
+  function bioAuth(){var id=localStorage.getItem(BIOK);if(!id)return Promise.reject();return navigator.credentials.get({publicKey:{challenge:randCh(),allowCredentials:[{type:'public-key',id:b64ToBuf(id)}],userVerification:'required',timeout:60000}}).then(function(){return true;});}
+  var bioBtn=document.getElementById('bio-login');
+  if(bioBtn){
+    if(localStorage.getItem(BIOK)&&bioSupported())bioBtn.style.display='block';
+    bioBtn.onclick=function(){var er=document.getElementById('login-err');er.textContent='';bioAuth().then(function(){sessionStorage.setItem(AUTHK,'1');hideLogin();}).catch(function(){er.textContent='האימות הביומטרי נכשל או בוטל';});};
+  }
 
   if(!BASE.length){view.innerHTML='<div class="demo">⚠️ לא נטענו נתוני מוצרים. ודאו שהתיקייה <b>admin</b> נמצאת לצד תיקיית <b>Web</b> (הנתונים נטענים מ-<code>../assets/products-data.js</code>).</div>';}
   else render();
