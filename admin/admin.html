@@ -710,7 +710,7 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
   /* ---------- auth (basic client-side gate) ---------- */
   var AUTHK='hmh_admin_auth';
   function getPass(){return localStorage.getItem('hmh_admin_pass')||'123456!';}
-  function showLogin(){document.getElementById('login-screen').style.display='flex';document.body.classList.add('locked');var pw=document.getElementById('login-pass');if(pw){pw.value='';setTimeout(function(){try{pw.focus();}catch(e){}},60);}}
+  function showLogin(){document.getElementById('login-screen').style.display='flex';document.body.classList.add('locked');if(typeof updateBioBtn==='function')updateBioBtn();var pw=document.getElementById('login-pass');if(pw){pw.value='';setTimeout(function(){try{pw.focus();}catch(e){}},60);}}
   function hideLogin(){document.getElementById('login-screen').style.display='none';document.body.classList.remove('locked');}
   function tryLogin(){var v=document.getElementById('login-pass').value;if(v===getPass()){sessionStorage.setItem(AUTHK,'1');document.getElementById('login-err').textContent='';hideLogin();}else{document.getElementById('login-err').textContent='סיסמה שגויה';}}
   document.getElementById('login-btn').onclick=tryLogin;
@@ -726,9 +726,10 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
   function bioRegister(){return navigator.credentials.create({publicKey:{challenge:randCh(),rp:{name:'הכל מהכל — ניהול'},user:{id:new Uint8Array([104,109,104,45,97,100,109,105,110]),name:'admin',displayName:'מנהל החנות'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000,attestation:'none'}}).then(function(cred){localStorage.setItem(BIOK,bufToB64(cred.rawId));return true;});}
   function bioAuth(){var id=localStorage.getItem(BIOK);if(!id)return Promise.reject();return navigator.credentials.get({publicKey:{challenge:randCh(),allowCredentials:[{type:'public-key',id:b64ToBuf(id)}],userVerification:'required',timeout:60000}}).then(function(){return true;});}
   var bioBtn=document.getElementById('bio-login');
+  function updateBioBtn(){if(!bioBtn)return;if(bioSupported()){bioBtn.style.display='block';bioBtn.textContent=localStorage.getItem(BIOK)?'🔒 כניסה עם טביעת אצבע / זיהוי פנים':'🔒 הפעלת כניסה עם טביעת אצבע / פנים';}else{bioBtn.style.display='none';}}
   if(bioBtn){
-    if(localStorage.getItem(BIOK)&&bioSupported())bioBtn.style.display='block';
-    bioBtn.onclick=function(){var er=document.getElementById('login-err');er.textContent='';bioAuth().then(function(){sessionStorage.setItem(AUTHK,'1');hideLogin();}).catch(function(){er.textContent='האימות הביומטרי נכשל או בוטל';});};
+    updateBioBtn();
+    bioBtn.onclick=function(){var er=document.getElementById('login-err');er.textContent='';var p=localStorage.getItem(BIOK)?bioAuth():bioRegister();p.then(function(){sessionStorage.setItem(AUTHK,'1');hideLogin();}).catch(function(){er.textContent='האימות/ההפעלה נכשלו או בוטלו (דרוש חיבור מאובטח HTTPS + ביומטריה במכשיר)';});};
   }
 
   if(!BASE.length){view.innerHTML='<div class="demo">⚠️ לא נטענו נתוני מוצרים. ודאו שהתיקייה <b>admin</b> נמצאת לצד תיקיית <b>Web</b> (הנתונים נטענים מ-<code>../assets/products-data.js</code>).</div>';}
