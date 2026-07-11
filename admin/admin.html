@@ -459,7 +459,7 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
     download('products.csv','﻿'+head.join(',')+'\r\n'+rows.join('\r\n'));
   }
   function csv(v){v=(v==null?'':String(v));return '"'+v.replace(/"/g,'""')+'"';}
-  function download(name,content){var blob=new Blob([content],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},100);toast('הקובץ הורד');}
+  function download(name,content,type){var blob=new Blob([content],{type:(type||'text/plain')+';charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},100);toast('הקובץ הורד');}
 
   /* ---------- CSV IMPORT ---------- */
   function parseCSV(text){
@@ -607,7 +607,7 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
         '<div class="stat"><b style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+money(bal)+'</b><span>'+(bal>=0?'רווח':'הפסד')+'</span></div>'+
         '<div class="stat"><b>'+list.length+'</b><span>תנועות</span></div>'+
       '</div>'+
-      '<div class="toolbar"><select id="fmonth">'+opts+'</select><button class="btn btn-gold" id="fadd">+ תנועה חדשה</button><button class="btn btn-line" id="freport">📄 הפקת דו"ח</button><button class="btn btn-line" id="fcsv">⬇ ייצוא CSV</button></div>'+
+      '<div class="toolbar"><select id="fmonth">'+opts+'</select><button class="btn btn-gold" id="fadd">+ תנועה חדשה</button><button class="btn btn-line" id="freport">📊 הפקת דו"ח (Excel)</button><button class="btn btn-line" id="fcsv">⬇ ייצוא CSV</button></div>'+
       finChart()+
       sysBreakdown(list)+
       '<div class="card" style="padding:0;overflow-x:auto"><table class="tbl"><thead><tr><th>תאריך</th><th>סוג</th><th>קטגוריה</th><th class="hide-sm">מקור</th><th class="hide-sm">תיאור</th><th>סכום</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="7" style="text-align:center;padding:30px;color:#999">אין תנועות עדיין — לחצו "תנועה חדשה"</td></tr>')+'</tbody></table></div>';
@@ -626,28 +626,28 @@ input[type=file]::-webkit-file-upload-button{border:1.5px solid var(--gold);bord
     var now=new Date(),stamp=now.toLocaleDateString('he-IL')+' '+now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
     function byCat(dir){var m={};list.filter(function(e){return e.dir===dir;}).forEach(function(e){var c=e.cat||'ללא קטגוריה';m[c]=(m[c]||0)+(parseFloat(e.amount)||0);});return Object.keys(m).sort(function(a,b){return m[b]-m[a];}).map(function(c){return {cat:c,amt:m[c]};});}
     function bySys(){var m={};list.filter(function(e){return e.dir==='out';}).forEach(function(e){var s=e.sys||'לא מסווג';m[s]=(m[s]||0)+(parseFloat(e.amount)||0);});return Object.keys(m).sort(function(a,b){return m[b]-m[a];}).map(function(s){return {cat:s,amt:m[s]};});}
-    function catRows(arr,tot){return arr.map(function(r){return '<tr><td>'+esc(r.cat)+'</td><td>'+money(r.amt)+'</td><td>'+(tot?Math.round(r.amt/tot*100):0)+'%</td></tr>';}).join('')||'<tr><td colspan="3">—</td></tr>';}
-    var txRows=list.map(function(e){return '<tr><td>'+esc(e.date||'')+'</td><td>'+(e.dir==='in'?'הכנסה':'הוצאה')+'</td><td>'+esc(e.cat||'')+'</td><td>'+esc(e.note||'')+'</td><td style="color:'+(e.dir==='in'?'#2e9e4f':'#e23b3b')+'">'+(e.dir==='in'?'+':'−')+money(e.amount)+'</td></tr>';}).join('');
-    var doc='<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>דו"ח כספים — '+esc(SET.name)+'</title><style>'+
-      'body{font-family:Arial,"Segoe UI",sans-serif;color:#1f2430;margin:0;padding:30px;background:#fff}'+
-      '.rh{border-bottom:3px solid #c9a23a;padding-bottom:14px;margin-bottom:18px}.rh h1{margin:0 0 4px;font-size:22px}.rh .sub{color:#666;font-size:14px}'+
-      'h2{font-size:16px;color:#a07d1f;margin:22px 0 8px;border-right:4px solid #c9a23a;padding-right:8px}'+
-      'table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}th,td{border:1px solid #e0e0e0;padding:7px 9px;text-align:right}th{background:#faf6ea;color:#666}'+
-      '.sum{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}.sum div{flex:1;min-width:120px;border:1px solid #e0e0e0;border-radius:10px;padding:12px;text-align:center}.sum b{display:block;font-size:22px}.sum span{font-size:12px;color:#666}'+
-      '.pos{color:#2e9e4f}.neg{color:#e23b3b}.foot{margin-top:26px;border-top:1px solid #ddd;padding-top:12px;color:#888;font-size:12px}'+
-      '.noprint{margin:0 0 16px}.pbtn{background:#c9a23a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer;font-family:inherit}'+
-      '@media print{.noprint{display:none}body{padding:0}}</style></head><body>'+
-      '<div class="noprint"><button class="pbtn" onclick="window.print()">🖨 הדפסה / שמירה כ-PDF</button></div>'+
-      '<div class="rh"><h1>דו"ח כספים — '+esc(SET.name)+'</h1><div class="sub">תקופה: '+esc(period)+' · הופק בתאריך '+esc(stamp)+'</div></div>'+
-      '<div class="sum"><div><b class="pos">'+money(tIn)+'</b><span>הכנסות</span></div><div><b class="neg">'+money(tOut)+'</b><span>הוצאות</span></div><div><b class="'+(bal>=0?'pos':'neg')+'">'+money(bal)+'</b><span>'+(bal>=0?'רווח':'הפסד')+'</span></div></div>'+
-      '<h2>הכנסות לפי קטגוריה</h2><table><thead><tr><th>קטגוריה</th><th>סכום</th><th>%</th></tr></thead><tbody>'+catRows(byCat('in'),tIn)+'</tbody></table>'+
-      '<h2>הוצאות לפי קטגוריה</h2><table><thead><tr><th>קטגוריה</th><th>סכום</th><th>%</th></tr></thead><tbody>'+catRows(byCat('out'),tOut)+'</tbody></table>'+
-      '<h2>הוצאות לפי מערכת / מקור</h2><table><thead><tr><th>מערכת / מקור</th><th>סכום</th><th>%</th></tr></thead><tbody>'+catRows(bySys(),tOut)+'</tbody></table>'+
-      '<h2>פירוט תנועות ('+list.length+')</h2><table><thead><tr><th>תאריך</th><th>סוג</th><th>קטגוריה</th><th>תיאור</th><th>סכום</th></tr></thead><tbody>'+txRows+'</tbody></table>'+
-      '<div class="foot">'+esc(SET.name)+' · '+esc(SET.address)+' · '+esc(SET.phone)+'</div></body></html>';
-    var w=window.open('','_blank');
-    if(!w){modalAlert('הדפדפן חסם את חלון הדו"ח. אפשרו חלונות קופצים (popups) ונסו שוב.','הפקת דו"ח');return;}
-    w.document.open();w.document.write(doc);w.document.close();
+    var num=function(v){return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2);};
+    var pct=function(a,t){return (t?Math.round(a/t*100):0)+'%';};
+    var catRows=function(arr,tot){return arr.map(function(r){return '<tr><td>'+esc(r.cat)+'</td><td>'+num(r.amt)+'</td><td>'+pct(r.amt,tot)+'</td></tr>';}).join('')||'<tr><td>—</td><td></td><td></td></tr>';};
+    var txRows=list.map(function(e){return '<tr><td>'+esc(e.date||'')+'</td><td>'+(e.dir==='in'?'הכנסה':'הוצאה')+'</td><td>'+esc(e.cat||'')+'</td><td>'+esc(e.sys||'')+'</td><td>'+esc(e.note||'')+'</td><td>'+(e.dir==='in'?'':'-')+num(e.amount)+'</td></tr>';}).join('');
+    var xls='﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8">'+
+      '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>דוח כספים</x:Name><x:WorksheetOptions><x:DisplayRightToLeft/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->'+
+      '<style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:5px 9px;text-align:right}th{background:#faf6ea;font-weight:bold}</style></head>'+
+      '<body dir="rtl"><table>'+
+      '<tr><td colspan="6" style="font-size:16px;font-weight:bold">דו"ח כספים — '+esc(SET.name)+'</td></tr>'+
+      '<tr><td colspan="6">תקופה: '+esc(period)+' · הופק בתאריך: '+esc(stamp)+' · הסכומים ב-₪</td></tr>'+
+      '<tr><td colspan="6"></td></tr>'+
+      '<tr><th>הכנסות</th><th>הוצאות</th><th>'+(bal>=0?'רווח':'הפסד')+'</th><td colspan="3"></td></tr>'+
+      '<tr><td>'+num(tIn)+'</td><td>'+num(tOut)+'</td><td>'+num(bal)+'</td><td colspan="3"></td></tr>'+
+      '<tr><td colspan="6"></td></tr>'+
+      '<tr><th colspan="3">הכנסות לפי קטגוריה</th></tr><tr><th>קטגוריה</th><th>סכום</th><th>%</th></tr>'+catRows(byCat('in'),tIn)+
+      '<tr><td colspan="6"></td></tr><tr><th colspan="3">הוצאות לפי קטגוריה</th></tr><tr><th>קטגוריה</th><th>סכום</th><th>%</th></tr>'+catRows(byCat('out'),tOut)+
+      '<tr><td colspan="6"></td></tr><tr><th colspan="3">הוצאות לפי מערכת / מקור</th></tr><tr><th>מערכת / מקור</th><th>סכום</th><th>%</th></tr>'+catRows(bySys(),tOut)+
+      '<tr><td colspan="6"></td></tr><tr><th colspan="6">פירוט תנועות ('+list.length+')</th></tr>'+
+      '<tr><th>תאריך</th><th>סוג</th><th>קטגוריה</th><th>מקור</th><th>תיאור</th><th>סכום</th></tr>'+txRows+
+      '</table></body></html>';
+    var fname='דוח-כספים-'+(finFilter==='all'?'כל-התקופות':finFilter)+'.xls';
+    download(fname, xls, 'application/vnd.ms-excel');
   }
   function sysBreakdown(list){
     var m={};list.filter(function(e){return e.dir==='out';}).forEach(function(e){var s=e.sys||'לא מסווג';m[s]=(m[s]||0)+(parseFloat(e.amount)||0);});
